@@ -48,7 +48,8 @@ class ConsumerOffsetMetrics < Sensu::Plugin::Metric::CLI::Graphite
   option :topic,
          description: 'Comma-separated list of consumer topics',
          short:       '-t NAME',
-         long:        '--topic NAME'
+         long:        '--topic NAME',
+         proc:        proc { |a| a.split(',') }
 
   option :topic_excludes,
          description: 'Excludes consumer topics',
@@ -90,7 +91,6 @@ class ConsumerOffsetMetrics < Sensu::Plugin::Metric::CLI::Graphite
       kafka_consumer_groups = "#{config[:kafka_home]}/bin/kafka-consumer-groups.sh"
       unknown "Can not find #{kafka_consumer_groups}" unless File.exist?(kafka_consumer_groups)
 
-      cmd += " --topic #{config[:topic]}" if config[:topic]
       cmd = "#{kafka_consumer_groups} kafka.tools.ConsumerOffsetChecker --group #{config[:group]} --zookeeper #{config[:zookeeper]} --describe"
 
       results = run_cmd(cmd)
@@ -100,6 +100,7 @@ class ConsumerOffsetMetrics < Sensu::Plugin::Metric::CLI::Graphite
           Hash[k, v.inject(0) { |a, e| a + e[field].to_i }]
         end
         sum_by_group.delete_if { |x| config[:topic_excludes].include?(x.keys[0]) } if config[:topic_excludes]
+        sum_by_group.select! { |x| config[:topic].include?(x.keys[0]) } if config[:topic]
         sum_by_group.each do |x|
           output "#{config[:scheme]}.#{config[:group]}.#{x.keys[0]}.#{field}", x.values[0]
         end
