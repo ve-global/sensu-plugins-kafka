@@ -82,7 +82,7 @@ class ConsumerOffsetMetrics < Sensu::Plugin::Metric::CLI::Graphite
   # @param cms [String]
   def run_cmd(cmd)
     read_lines(cmd).drop(1).map do |line|
-      line_to_hash(line, :group, :topic, :pid, :offset, :logsize, :lag, :owner)
+      line_to_hash(line, :group, :topic, :pid, :offset, :logsize, :lag, :owner) if line =~ /^#{config[:group]}/
     end
   end
 
