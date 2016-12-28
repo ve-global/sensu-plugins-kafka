@@ -87,11 +87,11 @@ class ConsumerOffsetMetrics < Sensu::Plugin::Metric::CLI::Graphite
 
   def run
     begin
-      kafka_run_class = "#{config[:kafka_home]}/bin/kafka-run-class.sh"
-      unknown "Can not find #{kafka_run_class}" unless File.exist?(kafka_run_class)
+      kafka_consumer_groups = "#{config[:kafka_home]}/bin/kafka-consumer-groups.sh"
+      unknown "Can not find #{kafka_consumer_groups}" unless File.exist?(kafka_consumer_groups)
 
-      cmd = "#{kafka_run_class} kafka.tools.ConsumerOffsetChecker --group #{config[:group]} --zookeeper #{config[:zookeeper]}"
       cmd += " --topic #{config[:topic]}" if config[:topic]
+      cmd = "#{kafka_consumer_groups} kafka.tools.ConsumerOffsetChecker --group #{config[:group]} --zookeeper #{config[:zookeeper]} --describe"
 
       results = run_cmd(cmd)
 
