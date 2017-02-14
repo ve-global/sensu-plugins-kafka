@@ -57,11 +57,24 @@ class ConsumerOffsetMetrics < Sensu::Plugin::Metric::CLI::Graphite
          long:        '--topic-excludes NAME',
          proc:        proc { |a| a.split(',') }
 
+  option :bootstrap_server,
+         description: 'BootStrap connect string',
+         short:       '-b NAME',
+         long:        '--bootstrap-server NAME',
+         default:     'localhost:9092'
+
   option :zookeeper,
          description: 'ZooKeeper connect string',
          short:       '-z NAME',
          long:        '--zookeeper NAME',
          default:     'localhost:2181'
+
+  option :new_consumer,
+         description: 'Uses the new consumer',
+         short:       '-n VALUE',
+         long:        '--new-consumer VALUE',
+         boolean: true,
+         default: true
 
   # read the output of a command
   # @param cmd [String] the command to read the output from
@@ -91,7 +104,11 @@ class ConsumerOffsetMetrics < Sensu::Plugin::Metric::CLI::Graphite
       kafka_consumer_groups = "#{config[:kafka_home]}/bin/kafka-consumer-groups.sh"
       unknown "Can not find #{kafka_consumer_groups}" unless File.exist?(kafka_consumer_groups)
 
-      cmd = "#{kafka_consumer_groups} kafka.tools.ConsumerOffsetChecker --group #{config[:group]} --zookeeper #{config[:zookeeper]} --describe"
+      if config[:new_consumer].to_s == 'true'
+        cmd = "#{kafka_consumer_groups} --group #{config[:group]} --bootstrap-server #{config[:bootstrap_server]} --describe"
+      else
+        cmd = "#{kafka_consumer_groups} --group #{config[:group]} --zookeeper #{config[:zookeeper]} --describe"
+      end
 
       results = run_cmd(cmd)
 
