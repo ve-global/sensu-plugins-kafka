@@ -149,8 +149,9 @@ class ConsumerLagCheck < Sensu::Plugin::Check::CLI
 
     critical "Could not found topics/partitions" if topics.empty?
 
-    [:offset, :logsize, :lag].each do |field|
-      topics.map do |k, v|
+    # [:offset, :logsize, :lag].each do |field|
+    [:offset, :logsize].each do |field|
+        topics.map do |k, v|
         critical "Topic #{k} has partitions with #{field} < 0" unless v.select { |w| w[field].to_i < 0 }.empty?
       end
     end
