@@ -110,8 +110,8 @@ class ConsumerLagCheck < Sensu::Plugin::Check::CLI
   # run command and return a hash from the output
   # @param cms [String]
   def run_offset(cmd)
-    read_lines(cmd).drop(1).map do |line|
-      line_to_hash(line, :group, :topic, :pid, :offset, :logsize, :lag, :owner)
+    read_lines(cmd).drop(3).map do |line|
+      line_to_hash(line, :topic, :pid, :offset, :logsize, :lag, :owner)
     end
   end
 
